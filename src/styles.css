@@ -10,6 +10,8 @@
   --border:#e6e2da;    /* soft border */
   --danger:#b91c1c;    /* subdued red */
   --warn:#c2410c;      /* amber-ish for badge */
+  --danger-bg:#fff5f5; /* soft red paper */
+  --danger-border:#f3c2c2; /* soft red border */
 }
 
 *{ box-sizing:border-box }
@@ -81,18 +83,19 @@ input[type="number"]{ width:70px }
   border-radius:8px;
   padding:10px 14px;
   color:#111827;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: #ffffff;
+  border:1px solid var(--border);
   font-weight:600;
   cursor:pointer;
 }
 .btn:disabled{ opacity:.6; cursor:not-allowed }
 .btn-xs{ padding:6px 8px; font-size:12px; }
-.btn.secondary{
-  background:#ffffff;
-  color:var(--text);
-  border:1px solid var(--border);
+.btn.secondary{ background:#ffffff; color:var(--text); border:1px solid var(--border); }
+.btn.danger{
+  background: var(--danger-bg);
+  border:1px solid var(--danger-border);
+  color: var(--danger);
 }
-.btn.danger{ background:linear-gradient(135deg, #ff9f9f, var(--danger)) }
 
 .list{
   list-style:none;
