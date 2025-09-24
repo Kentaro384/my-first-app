@@ -11,3 +11,6 @@
 
 ## Next
 - Create `dev` branch for preview deploy.
+
+Deployed by Amplify 🚀
+Deployed by Amplify 🚀
