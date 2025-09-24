@@ -112,7 +112,10 @@ export function App() {
     <div className="container">
       <div className="panel">
         <div className="header">
-          <h1 className="title">買い物リスト</h1>
+          <div>
+            <h1 className="title">RE: STOCK</h1>
+            <div className="subtitle">日々の補充を、かんたんに。</div>
+          </div>
           <span className="badge-warn">要補充: {remaining}</span>
         </div>
 

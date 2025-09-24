@@ -45,10 +45,16 @@ body{
 
 .title{
   margin:0;
-  font-size:28px;
-  letter-spacing:.05em;
+  font-size:26px;
+  letter-spacing:.08em;
   font-weight:800;
   color:#111827;
+}
+.subtitle{
+  margin:0;
+  color:#6b6b6b;
+  font-size:12px;
+  letter-spacing:.15em;
 }
 .badge-warn{
   padding:6px 10px;
@@ -81,7 +87,7 @@ input[type="number"]{ width:70px }
 .btn{
   border:0;
   border-radius:8px;
-  padding:10px 14px;
+  padding:8px 12px; /* match inputs */
   color:#111827;
   background: #ffffff;
   border:1px solid var(--border);
