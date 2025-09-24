@@ -1,0 +1,19 @@
+# Node
+node_modules/
+npm-debug.log*
+dist/
+build/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# OS/Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Secrets (必要になったら)
+.env
+*.pem
