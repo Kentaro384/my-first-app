@@ -1,14 +1,15 @@
 :root{
-  /* Light theme */
-  --bg:#ffffff;
-  --panel:#ffffff;
-  --text:#1f2937; /* slate-800 */
-  --muted:#6b7280; /* slate-500 */
-  --accent:#D3EDFB; /* light blue */
-  --accent-2:#FAD2D8; /* light pink */
-  --accent-3:#FAF4D2; /* light yellow */
-  --border:#e5e7eb; /* gray-200 */
-  --danger:#ef4444;
+  /* MUJI-like minimal light theme */
+  --bg:#faf7f2;        /* warm paper */
+  --panel:#ffffff;     /* clean card */
+  --text:#1f2937;      /* deep gray */
+  --muted:#6b6b6b;     /* neutral */
+  --accent:#8a8a8a;    /* subtle accent */
+  --accent-2:#b0b0b0;  /* secondary neutral */
+  --accent-3:#dcd6c8;  /* sand */
+  --border:#e6e2da;    /* soft border */
+  --danger:#b91c1c;    /* subdued red */
+  --warn:#c2410c;      /* amber-ish for badge */
 }
 
 *{ box-sizing:border-box }
@@ -17,10 +18,7 @@ body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
   color:var(--text);
-  background: linear-gradient(180deg, var(--accent) 0%, transparent 40%),
-              linear-gradient(180deg, var(--accent-2) 0%, transparent 60%),
-              linear-gradient(180deg, var(--accent-3) 0%, transparent 80%),
-              var(--bg);
+  background: var(--bg);
 }
 
 .container{
@@ -45,13 +43,26 @@ body{
 
 .title{
   margin:0;
-  font-size:24px;
-  letter-spacing:.3px;
+  font-size:28px;
+  letter-spacing:.05em;
+  font-weight:800;
+  color:#111827;
+}
+.badge-warn{
+  padding:6px 10px;
+  border-radius:999px;
+  background:#fff7ed; /* amber-50 */
+  border:1px solid #fed7aa; /* amber-200 */
+  color:var(--warn);
+  font-weight:600;
 }
 
 .muted{ color:var(--muted) }
 
-.form{ display:flex; gap:8px; padding:8px 16px 12px 16px; }
+.form{ display:flex; gap:8px; padding:8px 16px 12px 16px; align-items:center; }
+.form .grow{ flex:1 }
+.form .num{ width:70px }
+.form .add-wrap{ margin-left:auto }
 
 input[type="text"], input[type="number"]{
   background:#ffffff;
@@ -63,7 +74,7 @@ input[type="text"], input[type="number"]{
 }
 
 input[type="text"]{ flex:1 }
-input[type="number"]{ width:88px }
+input[type="number"]{ width:70px }
 
 .btn{
   border:0;

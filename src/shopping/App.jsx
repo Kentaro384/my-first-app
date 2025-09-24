@@ -113,7 +113,7 @@ export function App() {
       <div className="panel">
         <div className="header">
           <h1 className="title">買い物リスト</h1>
-          <span className="muted">要補充: {remaining}</span>
+          <span className="badge-warn">要補充: {remaining}</span>
         </div>
 
         <form className="form" onSubmit={addItem}>
@@ -122,6 +122,7 @@ export function App() {
             placeholder="品名を入力"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            className="grow"
           />
           <input
             aria-label="target stock"
@@ -132,6 +133,7 @@ export function App() {
             pattern="[0-9]*"
             onChange={(e) => setTargetStock(e.target.value.replace(/[^0-9]/g, ""))}
             placeholder="目標在庫"
+            className="num"
           />
           <input
             aria-label="stock on hand"
@@ -142,6 +144,7 @@ export function App() {
             pattern="[0-9]*"
             onChange={(e) => setStockOnHand(e.target.value.replace(/[^0-9]/g, ""))}
             placeholder="手持ち在庫"
+            className="num"
           />
           <input
             aria-label="tags"
@@ -149,7 +152,9 @@ export function App() {
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
           />
-          <button className="btn" type="submit">追加</button>
+          <div className="add-wrap">
+            <button className="btn" type="submit">追加</button>
+          </div>
         </form>
 
         <div className="toolbar">
