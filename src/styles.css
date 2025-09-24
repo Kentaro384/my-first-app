@@ -76,6 +76,7 @@ input[type="number"]{ width:110px }
   font-weight:600;
   cursor:pointer;
 }
+.btn:disabled{ opacity:.6; cursor:not-allowed }
 .btn.secondary{
   background:#0f141b;
   color:var(--text);
@@ -113,6 +114,7 @@ input[type="number"]{ width:110px }
   gap:8px;
   padding:0 24px 20px 24px;
 }
+.toolbar .danger-small{ opacity:.6 }
 
 .chips{ display:flex; gap:6px; flex-wrap:wrap; }
 .chip{

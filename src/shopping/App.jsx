@@ -37,7 +37,7 @@ export function App() {
   const [items, setItems] = useState(() => loadItems());
   const [name, setName] = useState("");
   const [targetStock, setTargetStock] = useState(1);
-  const [stockOnHand, setStockOnHand] = useState(0);
+  const [stockOnHand, setStockOnHand] = useState(1);
   const [showAll, setShowAll] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [activeTag, setActiveTag] = useState("ALL");
@@ -46,7 +46,7 @@ export function App() {
     saveItems(items);
   }, [items]);
 
-  const needsRestock = (item) => (item.stockOnHand ?? 0) < (item.targetStock ?? 1);
+  const needsRestock = (item) => (item.stockOnHand ?? 1) < (item.targetStock ?? 1);
 
   const remaining = useMemo(() => items.filter(needsRestock).length, [items]);
 
@@ -64,14 +64,14 @@ export function App() {
       quantity: 1,
       purchased: false,
       targetStock: Number(targetStock) > 0 ? Number(targetStock) : 1,
-      stockOnHand: Number(stockOnHand) >= 0 ? Number(stockOnHand) : 0,
+      stockOnHand: Number(stockOnHand) >= 0 ? Number(stockOnHand) : 1,
       tags,
       createdAt: Date.now(),
     };
     setItems((prev) => [next, ...prev]);
     setName("");
     setTargetStock(1);
-    setStockOnHand(0);
+    setStockOnHand(1);
     setTagInput("");
   }
 
@@ -91,10 +91,20 @@ export function App() {
         i.id === id
           ? {
               ...i,
-              stockOnHand: Math.max(0, Number(i.stockOnHand || 0) + delta),
+              stockOnHand: Math.max(0, Number(i.stockOnHand ?? 1) + delta),
             }
           : i
       )
+    );
+  }
+
+  function setZero(id) {
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, stockOnHand: 0 } : i)));
+  }
+
+  function fillToTarget(id) {
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, stockOnHand: Number(i.targetStock || 1) } : i))
     );
   }
 
@@ -118,7 +128,9 @@ export function App() {
             type="number"
             min={1}
             value={targetStock}
-            onChange={(e) => setTargetStock(e.target.value)}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            onChange={(e) => setTargetStock(e.target.value.replace(/[^0-9]/g, ""))}
             placeholder="Target stock"
           />
           <input
@@ -126,7 +138,9 @@ export function App() {
             type="number"
             min={0}
             value={stockOnHand}
-            onChange={(e) => setStockOnHand(e.target.value)}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            onChange={(e) => setStockOnHand(e.target.value.replace(/[^0-9]/g, ""))}
             placeholder="On hand"
           />
           <input
@@ -142,7 +156,16 @@ export function App() {
           <button className="btn secondary" onClick={() => setShowAll((v) => !v)}>
             {showAll ? "Show needing restock" : "Show all"}
           </button>
-          <button className="btn danger" onClick={() => setItems([])}>Clear all</button>
+          <button
+            className="btn danger danger-small"
+            onClick={() => {
+              if (!confirm("Clear all items? This cannot be undone.")) return;
+              const second = prompt("Type CLEAR to confirm");
+              if (second === "CLEAR") setItems([]);
+            }}
+          >
+            Clear all
+          </button>
         </div>
 
         <div className="toolbar">
@@ -155,6 +178,34 @@ export function App() {
               {activeTag === t ? "✓ " : ""}{t}
             </button>
           ))}
+        </div>
+
+        <div className="toolbar">
+          <span className="muted">Use existing tags:</span>
+          <div className="chips">
+            {Array.from(new Set(items.flatMap((i) => i.tags || []))).map((t) => {
+              const selected = ("," + tagInput + ",").includes("," + t + ",");
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  className="btn secondary"
+                  onClick={() => {
+                    const set = new Set(
+                      tagInput
+                        .split(",")
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                    );
+                    if (selected) set.delete(t); else set.add(t);
+                    setTagInput(Array.from(set).join(", "));
+                  }}
+                >
+                  {selected ? "✓ " : ""}#{t}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <ul className="list">
@@ -174,6 +225,8 @@ export function App() {
               <div className="actions">
                 <button type="button" className="btn secondary" onClick={() => adjustStock(item.id, -1)}>-1</button>
                 <button type="button" className="btn secondary" onClick={() => adjustStock(item.id, 1)}>+1</button>
+                <button type="button" className="btn secondary" onClick={() => setZero(item.id)}>Zero</button>
+                <button type="button" className="btn secondary" onClick={() => fillToTarget(item.id)}>Fill</button>
                 <button className="btn secondary" onClick={() => removeItem(item.id)}>Delete</button>
               </div>
               {(item.tags && item.tags.length > 0) && (
