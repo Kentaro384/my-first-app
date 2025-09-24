@@ -112,14 +112,14 @@ export function App() {
     <div className="container">
       <div className="panel">
         <div className="header">
-          <h1 className="title">Shopping List</h1>
-          <span className="muted">Needs restock: {remaining}</span>
+          <h1 className="title">買い物リスト</h1>
+          <span className="muted">要補充: {remaining}</span>
         </div>
 
         <form className="form" onSubmit={addItem}>
           <input
             aria-label="item name"
-            placeholder="Add an item..."
+            placeholder="品名を入力"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -131,7 +131,7 @@ export function App() {
             inputMode="numeric"
             pattern="[0-9]*"
             onChange={(e) => setTargetStock(e.target.value.replace(/[^0-9]/g, ""))}
-            placeholder="Target stock"
+            placeholder="目標在庫"
           />
           <input
             aria-label="stock on hand"
@@ -141,37 +141,37 @@ export function App() {
             inputMode="numeric"
             pattern="[0-9]*"
             onChange={(e) => setStockOnHand(e.target.value.replace(/[^0-9]/g, ""))}
-            placeholder="On hand"
+            placeholder="手持ち在庫"
           />
           <input
             aria-label="tags"
-            placeholder="tags (comma separated)"
+            placeholder="タグ（カンマ区切り）"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
           />
-          <button className="btn" type="submit">Add</button>
+          <button className="btn" type="submit">追加</button>
         </form>
 
         <div className="toolbar">
           <button className="btn secondary" onClick={() => setShowAll((v) => !v)}>
-            {showAll ? "Show needing restock" : "Show all"}
+            {showAll ? "不足のみ表示" : "すべて表示"}
           </button>
           <button
             className="btn danger danger-small"
             onClick={() => {
-              if (!confirm("Clear all items? This cannot be undone.")) return;
-              const second = prompt("Type CLEAR to confirm");
+              if (!confirm("全アイテムを削除します。よろしいですか？")) return;
+              const second = prompt("続行するには CLEAR と入力してください");
               if (second === "CLEAR") setItems([]);
             }}
           >
-            Clear all
+            すべて削除
           </button>
         </div>
 
         <div className="toolbar">
-          <span className="muted">Filter by tag:</span>
+          <span className="muted">タグで絞り込み:</span>
           <button className="btn secondary" onClick={() => setActiveTag("ALL")}>
-            {activeTag === "ALL" ? "✓ " : ""}All
+            {activeTag === "ALL" ? "✓ " : ""}すべて
           </button>
           {Array.from(new Set(items.flatMap((i) => i.tags || []))).map((t) => (
             <button key={t} className="btn secondary" onClick={() => setActiveTag(t)}>
@@ -181,7 +181,7 @@ export function App() {
         </div>
 
         <div className="toolbar">
-          <span className="muted">Use existing tags:</span>
+          <span className="muted">既存タグから追加:</span>
           <div className="chips">
             {Array.from(new Set(items.flatMap((i) => i.tags || []))).map((t) => {
               const selected = ("," + tagInput + ",").includes("," + t + ",");
@@ -201,18 +201,35 @@ export function App() {
                     setTagInput(Array.from(set).join(", "));
                   }}
                 >
-                  {selected ? "✓ " : ""}#{t}
+                  {selected ? "✓ " : ""}{t}
                 </button>
               );
             })}
           </div>
         </div>
 
-        <ul className="list">
+        <ul className="list"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              const fromId = e.dataTransfer.getData("text/plain");
+              const toId = e.target.closest("li[data-id]")?.dataset.id;
+              if (!fromId || !toId || fromId === toId) return;
+              setItems((prev) => {
+                const list = [...prev];
+                const fromIdx = list.findIndex((i) => i.id === fromId);
+                const toIdx = list.findIndex((i) => i.id === toId);
+                if (fromIdx === -1 || toIdx === -1) return prev;
+                const [moved] = list.splice(fromIdx, 1);
+                list.splice(toIdx, 0, moved);
+                return list;
+              });
+            }}>
           {(showAll ? items : items.filter(needsRestock))
             .filter((i) => activeTag === "ALL" || (i.tags || []).includes(activeTag))
             .map((item) => (
-            <li className="item" key={item.id}>
+            <li className="item" key={item.id} data-id={item.id}
+                draggable
+                onDragStart={(e) => e.dataTransfer.setData("text/plain", item.id)}>
               <input
                 type="checkbox"
                 checked={item.purchased}
@@ -225,13 +242,13 @@ export function App() {
               <div className="actions">
                 <button type="button" className="btn secondary" onClick={() => adjustStock(item.id, -1)}>-1</button>
                 <button type="button" className="btn secondary" onClick={() => adjustStock(item.id, 1)}>+1</button>
-                <button type="button" className="btn secondary" onClick={() => setZero(item.id)}>Zero</button>
-                <button type="button" className="btn secondary" onClick={() => fillToTarget(item.id)}>Fill</button>
-                <button className="btn secondary" onClick={() => removeItem(item.id)}>Delete</button>
+                <button type="button" className="btn secondary btn-xs" onClick={() => setZero(item.id)}>0</button>
+                <button type="button" className="btn secondary btn-xs" onClick={() => fillToTarget(item.id)}>満タン</button>
+                <button className="btn secondary btn-xs" onClick={() => removeItem(item.id)}>削除</button>
               </div>
               {(item.tags && item.tags.length > 0) && (
-                <div className="muted" style={{ marginLeft: 34 }}>
-                  {item.tags.map((t) => `#${t}`).join(" ")}
+                <div className="muted" style={{ marginLeft: 34, fontSize: 12 }}>
+                  {item.tags.join(" ")}
                 </div>
               )}
             </li>
