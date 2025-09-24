@@ -12,6 +12,7 @@
   --warn:#c2410c;      /* amber-ish for badge */
   --danger-bg:#fff5f5; /* soft red paper */
   --danger-border:#f3c2c2; /* soft red border */
+  --control-h: 36px;   /* unified control height */
 }
 
 *{ box-sizing:border-box }
@@ -77,8 +78,13 @@ input[type="text"], input[type="number"]{
   color:var(--text);
   border:1px solid var(--border);
   border-radius:8px;
-  padding:8px 10px; /* compact */
+  padding:0 10px; /* use fixed height */
   outline:none;
+  height: var(--control-h);
+  line-height: calc(var(--control-h) - 2px);
+  -webkit-appearance: none;
+  appearance: none;
+  box-shadow: none;
 }
 
 input[type="text"]{ flex:1 }
@@ -87,12 +93,14 @@ input[type="number"]{ width:70px }
 .btn{
   border:0;
   border-radius:8px;
-  padding:8px 12px; /* match inputs */
+  padding:0 12px; /* match inputs */
   color:#111827;
   background: #ffffff;
   border:1px solid var(--border);
   font-weight:600;
   cursor:pointer;
+  height: var(--control-h);
+  line-height: calc(var(--control-h) - 2px);
 }
 .btn:disabled{ opacity:.6; cursor:not-allowed }
 .btn-xs{ padding:6px 8px; font-size:12px; }
