@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+  push:
+    branches: [ dev ]
+
+jobs:
+  basic-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure index.html exists
+        run: |
+          test -f index.html || (echo "index.html not found"; exit 1)
+
+      - name: Basic HTML sanity (title & h1 present)
+        run: |
+          grep -qi "<title>" index.html || (echo "No <title> tag"; exit 1)
+          grep -qi "<h1" index.html || (echo "No <h1> tag"; exit 1)
+
+      - name: Forbid TODO markers
+        run: |
+          ! grep -qi "TODO" index.html || (echo "Remove TODO before merge"; exit 1)
