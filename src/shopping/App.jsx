@@ -1,11 +1,29 @@
 import React, { useEffect, useMemo, useState } from "react";
+import "../styles.css";
 
-const STORAGE_KEY = "shopping-items-v1";
+const STORAGE_KEY = "shopping-items-v2";
 
 function loadItems() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    // Migration from v1: ensure stock fields exist
+    return Array.isArray(parsed)
+      ? parsed.map((i) => ({
+          targetStock: 1,
+          stockOnHand: 0,
+          ...i,
+          // guard against NaN
+          targetStock:
+            Number.isFinite(Number(i.targetStock)) && Number(i.targetStock) > 0
+              ? Number(i.targetStock)
+              : 1,
+          stockOnHand:
+            Number.isFinite(Number(i.stockOnHand)) && Number(i.stockOnHand) >= 0
+              ? Number(i.stockOnHand)
+              : 0,
+        }))
+      : [];
   } catch {
     return [];
   }
@@ -18,31 +36,43 @@ function saveItems(items) {
 export function App() {
   const [items, setItems] = useState(() => loadItems());
   const [name, setName] = useState("");
-  const [qty, setQty] = useState(1);
+  const [targetStock, setTargetStock] = useState(1);
+  const [stockOnHand, setStockOnHand] = useState(0);
+  const [showAll, setShowAll] = useState(false);
+  const [tagInput, setTagInput] = useState("");
+  const [activeTag, setActiveTag] = useState("ALL");
 
   useEffect(() => {
     saveItems(items);
   }, [items]);
 
-  const remaining = useMemo(
-    () => items.filter((i) => !i.purchased).length,
-    [items]
-  );
+  const needsRestock = (item) => (item.stockOnHand ?? 0) < (item.targetStock ?? 1);
+
+  const remaining = useMemo(() => items.filter(needsRestock).length, [items]);
 
   function addItem(e) {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return;
+    const tags = tagInput
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
     const next = {
       id: crypto.randomUUID(),
       name: trimmed,
-      quantity: Number(qty) || 1,
+      quantity: 1,
       purchased: false,
+      targetStock: Number(targetStock) > 0 ? Number(targetStock) : 1,
+      stockOnHand: Number(stockOnHand) >= 0 ? Number(stockOnHand) : 0,
+      tags,
       createdAt: Date.now(),
     };
     setItems((prev) => [next, ...prev]);
     setName("");
-    setQty(1);
+    setTargetStock(1);
+    setStockOnHand(0);
+    setTagInput("");
   }
 
   function togglePurchased(id) {
@@ -55,63 +85,105 @@ export function App() {
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
 
-  function clearPurchased() {
-    setItems((prev) => prev.filter((i) => !i.purchased));
+  function adjustStock(id, delta) {
+    setItems((prev) =>
+      prev.map((i) =>
+        i.id === id
+          ? {
+              ...i,
+              stockOnHand: Math.max(0, Number(i.stockOnHand || 0) + delta),
+            }
+          : i
+      )
+    );
   }
 
   return (
-    <div style={{ maxWidth: 560, margin: "40px auto", padding: 16 }}>
-      <h1>Shopping List</h1>
+    <div className="container">
+      <div className="panel">
+        <div className="header">
+          <h1 className="title">Shopping List</h1>
+          <span className="muted">Needs restock: {remaining}</span>
+        </div>
 
-      <form onSubmit={addItem} style={{ display: "flex", gap: 8 }}>
-        <input
-          aria-label="item name"
-          placeholder="Item name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          style={{ flex: 1 }}
-        />
-        <input
-          aria-label="quantity"
-          type="number"
-          min={1}
-          value={qty}
-          onChange={(e) => setQty(e.target.value)}
-          style={{ width: 100 }}
-        />
-        <button type="submit">Add</button>
-      </form>
+        <form className="form" onSubmit={addItem}>
+          <input
+            aria-label="item name"
+            placeholder="Add an item..."
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <input
+            aria-label="target stock"
+            type="number"
+            min={1}
+            value={targetStock}
+            onChange={(e) => setTargetStock(e.target.value)}
+            placeholder="Target stock"
+          />
+          <input
+            aria-label="stock on hand"
+            type="number"
+            min={0}
+            value={stockOnHand}
+            onChange={(e) => setStockOnHand(e.target.value)}
+            placeholder="On hand"
+          />
+          <input
+            aria-label="tags"
+            placeholder="tags (comma separated)"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+          />
+          <button className="btn" type="submit">Add</button>
+        </form>
 
-      <p style={{ marginTop: 12 }}>Remaining: {remaining}</p>
+        <div className="toolbar">
+          <button className="btn secondary" onClick={() => setShowAll((v) => !v)}>
+            {showAll ? "Show needing restock" : "Show all"}
+          </button>
+          <button className="btn danger" onClick={() => setItems([])}>Clear all</button>
+        </div>
 
-      <ul style={{ padding: 0, listStyle: "none" }}>
-        {items.map((item) => (
-          <li
-            key={item.id}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: 8,
-              borderBottom: "1px solid #eee",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={item.purchased}
-              onChange={() => togglePurchased(item.id)}
-            />
-            <span style={{ flex: 1, opacity: item.purchased ? 0.6 : 1 }}>
-              {item.name} × {item.quantity}
-            </span>
-            <button onClick={() => removeItem(item.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+        <div className="toolbar">
+          <span className="muted">Filter by tag:</span>
+          <button className="btn secondary" onClick={() => setActiveTag("ALL")}>
+            {activeTag === "ALL" ? "✓ " : ""}All
+          </button>
+          {Array.from(new Set(items.flatMap((i) => i.tags || []))).map((t) => (
+            <button key={t} className="btn secondary" onClick={() => setActiveTag(t)}>
+              {activeTag === t ? "✓ " : ""}{t}
+            </button>
+          ))}
+        </div>
 
-      <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={clearPurchased}>Clear purchased</button>
-        <button onClick={() => setItems([])}>Clear all</button>
+        <ul className="list">
+          {(showAll ? items : items.filter(needsRestock))
+            .filter((i) => activeTag === "ALL" || (i.tags || []).includes(activeTag))
+            .map((item) => (
+            <li className="item" key={item.id}>
+              <input
+                type="checkbox"
+                checked={item.purchased}
+                onChange={() => togglePurchased(item.id)}
+              />
+              <span className={"item-name" + (item.purchased ? " purchased" : "")}>
+                {item.name}
+                <span className="muted"> &nbsp;({item.stockOnHand}/{item.targetStock})</span>
+              </span>
+              <div className="actions">
+                <button type="button" className="btn secondary" onClick={() => adjustStock(item.id, -1)}>-1</button>
+                <button type="button" className="btn secondary" onClick={() => adjustStock(item.id, 1)}>+1</button>
+                <button className="btn secondary" onClick={() => removeItem(item.id)}>Delete</button>
+              </div>
+              {(item.tags && item.tags.length > 0) && (
+                <div className="muted" style={{ marginLeft: 34 }}>
+                  {item.tags.map((t) => `#${t}`).join(" ")}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

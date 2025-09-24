@@ -1,0 +1,133 @@
+:root{
+  --bg:#0e1116;
+  --panel:#161b22;
+  --text:#e6edf3;
+  --muted:#9da7b3;
+  --accent:#00d4ff;
+  --accent-2:#6a5cff;
+  --border: #263042;
+  --danger: #ff5b5b;
+}
+
+*{ box-sizing:border-box }
+html,body,#root{ height:100% }
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  color:var(--text);
+  background: radial-gradient(1200px 800px at 20% -20%, rgba(106,92,255,.15), transparent 60%),
+             radial-gradient(1000px 700px at 120% 20%, rgba(0,212,255,.15), transparent 60%),
+             var(--bg);
+}
+
+.container{
+  max-width:720px;
+  margin:48px auto;
+  padding:24px;
+}
+
+.panel{
+  background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border:1px solid var(--border);
+  border-radius:16px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.02);
+}
+
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 24px;
+}
+
+.title{
+  margin:0;
+  font-size:24px;
+  letter-spacing:.3px;
+}
+
+.muted{ color:var(--muted) }
+
+.form{
+  display:flex;
+  gap:10px;
+  padding:0 24px 20px 24px;
+}
+
+input[type="text"], input[type="number"]{
+  background:#0f141b;
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 14px;
+  outline:none;
+}
+
+input[type="text"]{ flex:1 }
+input[type="number"]{ width:110px }
+
+.btn{
+  border:0;
+  border-radius:10px;
+  padding:12px 16px;
+  color:#001015;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  font-weight:600;
+  cursor:pointer;
+}
+.btn.secondary{
+  background:#0f141b;
+  color:var(--text);
+  border:1px solid var(--border);
+}
+.btn.danger{ background:linear-gradient(135deg, #ff9f9f, var(--danger)) }
+
+.list{
+  list-style:none;
+  margin:0;
+  padding:8px 8px 8px 8px;
+}
+
+.item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background: #0f141b;
+  margin:10px 0;
+}
+
+.item-name{
+  flex:1;
+}
+
+.item-name.purchased{ opacity:.55; text-decoration: line-through }
+
+.actions{ display:flex; gap:8px; }
+
+.toolbar{
+  display:flex;
+  gap:8px;
+  padding:0 24px 20px 24px;
+}
+
+.chips{ display:flex; gap:6px; flex-wrap:wrap; }
+.chip{
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#0f141b;
+  color:var(--muted);
+  font-size:12px;
+}
+
+@media (max-width:560px){
+  .container{ padding:16px; }
+  .form{ flex-wrap:wrap }
+  input[type="number"]{ flex:1; min-width:120px }
+}
+
+
