@@ -10,10 +10,8 @@ function loadItems() {
     // Migration from v1: ensure stock fields exist
     return Array.isArray(parsed)
       ? parsed.map((i) => ({
-          targetStock: 1,
-          stockOnHand: 0,
           ...i,
-          // guard against NaN
+          // guard against NaN and ensure defaults
           targetStock:
             Number.isFinite(Number(i.targetStock)) && Number(i.targetStock) > 0
               ? Number(i.targetStock)
@@ -21,7 +19,7 @@ function loadItems() {
           stockOnHand:
             Number.isFinite(Number(i.stockOnHand)) && Number(i.stockOnHand) >= 0
               ? Number(i.stockOnHand)
-              : 0,
+              : 1,
         }))
       : [];
   } catch {
